@@ -36,6 +36,7 @@ npm プラグインとして:
 | `OPENCODE_AUTOMODE_FAIL_MODE` | `closed` | `closed` = 分類が失敗・タイムアウトしたらブロック（フェイルクローズド）。`open` = その場合は許可（フェイルオープン）。 |
 | `OPENCODE_AUTOMODE_TIMEOUT_MS` | `30000` | 1回の分類呼び出しのタイムアウト。 |
 | `OPENCODE_AUTOMODE_MAX_RETRIES` | `2` | 分類応答が不正な JSON だった場合の追加試行回数。 |
+| `OPENCODE_AUTOMODE_LOG_PATH` | *(空)* | プラグインのログを書き出すファイルパス（1行1つの JSON オブジェクト）。空の場合はファイルログを無効化します。 |
 
 ## セキュリティ上の注意
 

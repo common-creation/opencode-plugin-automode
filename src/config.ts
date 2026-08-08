@@ -4,6 +4,7 @@ export type AutoModeConfig = {
   failMode: "open" | "closed"
   timeoutMs: number
   maxRetries: number
+  logPath: string
 }
 
 function parseBool(value: string | undefined, fallback: boolean): boolean {
@@ -30,5 +31,6 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AutoModeConfig
     failMode: env.OPENCODE_AUTOMODE_FAIL_MODE?.trim().toLowerCase() === "open" ? "open" : "closed",
     timeoutMs: parseIntNonNegative(env.OPENCODE_AUTOMODE_TIMEOUT_MS, 30_000),
     maxRetries: parseIntNonNegative(env.OPENCODE_AUTOMODE_MAX_RETRIES, 2),
+    logPath: env.OPENCODE_AUTOMODE_LOG_PATH?.trim() ?? "",
   }
 }

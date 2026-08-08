@@ -1,17 +1,20 @@
 import type { Plugin } from "@opencode-ai/plugin"
 import { createClassifier } from "./classifier.js"
 import { loadConfig } from "./config.js"
+import { createLogger } from "./logger.js"
 
 const SERVICE = "automode"
 
 export const AutoMode: Plugin = async ({ client, directory }) => {
   const config = loadConfig()
+  const logger = createLogger(config.logPath)
   const classifier = createClassifier({
     client,
     directory,
     model: config.model,
     timeoutMs: config.timeoutMs,
     maxRetries: config.maxRetries,
+    logger,
   })
 
   await client.app.log({
@@ -27,6 +30,14 @@ export const AutoMode: Plugin = async ({ client, directory }) => {
         maxRetries: config.maxRetries,
       },
     },
+  })
+  logger.info("automode plugin initialized", {
+    enabled: config.enabled,
+    failMode: config.failMode,
+    model: config.model ? `${config.model.providerID}/${config.model.modelID}` : null,
+    timeoutMs: config.timeoutMs,
+    maxRetries: config.maxRetries,
+    logPath: config.logPath,
   })
 
   let inFlight = false
@@ -53,6 +64,7 @@ export const AutoMode: Plugin = async ({ client, directory }) => {
               extra: { command, reason: verdict.reason },
             },
           })
+          logger.warn("blocked dangerous command", { command, reason: verdict.reason })
           throw new Error(
             `[automode] Command blocked by safety classifier.\n\nCommand: ${command}\n\nReason: ${verdict.reason}`,
           )
@@ -66,6 +78,7 @@ export const AutoMode: Plugin = async ({ client, directory }) => {
             extra: { command, reason: verdict.reason },
           },
         })
+        logger.debug("allowed safe command", { command, reason: verdict.reason })
       } catch (error) {
         if (classifier.isInfraError(error) && config.failMode === "open") {
           await client.app.log({
@@ -76,8 +89,16 @@ export const AutoMode: Plugin = async ({ client, directory }) => {
               extra: { command, error: error.message },
             },
           })
+          logger.warn("classifier failed, allowing command (fail-open)", {
+            command,
+            error: error.message,
+          })
           return
         }
+        logger.error("command classification failed", {
+          command,
+          error: error instanceof Error ? error.message : String(error),
+        })
         throw error
       } finally {
         inFlight = false

@@ -1,6 +1,7 @@
 import type { createOpencodeClient, SessionPromptData } from "@opencode-ai/sdk"
 import type { Part } from "@opencode-ai/sdk"
 import { parseVerdict, type Verdict } from "./parse.js"
+import type { Logger } from "./logger.js"
 
 export type Client = ReturnType<typeof createOpencodeClient>
 export type ModelSpec = { providerID: string; modelID: string } | null
@@ -18,6 +19,14 @@ export type ClassifierOptions = {
   model: ModelSpec
   timeoutMs: number
   maxRetries: number
+  logger?: Logger
+}
+
+const NOOP_LOGGER: Logger = {
+  debug: () => {},
+  info: () => {},
+  warn: () => {},
+  error: () => {},
 }
 
 const SYSTEM_PROMPT = `You are a safety classifier for bash commands executed by an AI coding agent inside a development workspace.
@@ -54,7 +63,7 @@ const DENIED_TOOLS = {
 }
 
 export function createClassifier(options: ClassifierOptions) {
-  const { client, directory, model, timeoutMs, maxRetries } = options
+  const { client, directory, model, timeoutMs, maxRetries, logger = NOOP_LOGGER } = options
 
   function isInfraError(error: unknown): error is ClassificationError {
     return error instanceof ClassificationError
@@ -123,20 +132,34 @@ export function createClassifier(options: ClassifierOptions) {
 
   async function classify(command: string, callerSessionID: string): Promise<Verdict> {
     const resolvedModel = await resolveModel(callerSessionID)
+    logger.debug("classifying command", {
+      command,
+      model: resolvedModel ? `${resolvedModel.providerID}/${resolvedModel.modelID}` : null,
+    })
     let lastError: string | null = null
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
       const session = await createSession()
       try {
         const text = await promptSession(session.id, resolvedModel, command, lastError ?? undefined)
         const verdict = parseVerdict(text)
-        if (verdict) return verdict
+        if (verdict) {
+          logger.debug("classification verdict", {
+            attempt,
+            allowed: verdict.allowed,
+            reason: verdict.reason,
+          })
+          return verdict
+        }
         lastError = text.slice(0, 200)
+        logger.warn("classifier returned unparseable response", { attempt, text: lastError })
       } catch (error) {
         lastError = error instanceof Error ? error.message : String(error)
+        logger.warn("classifier attempt failed", { attempt, error: lastError })
       } finally {
         await deleteSession(session.id)
       }
     }
+    logger.error("classification failed", { command, lastError })
     throw new ClassificationError(`classifier produced no valid verdict after ${maxRetries + 1} attempt(s): ${lastError ?? "unknown error"}`)
   }
 

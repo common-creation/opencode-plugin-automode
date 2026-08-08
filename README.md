@@ -36,6 +36,7 @@ Or load it directly from a local build (e.g. `dist/index.js`) via a path spec in
 | `OPENCODE_AUTOMODE_FAIL_MODE` | `closed` | `closed` = block when the classifier fails or times out (fail-closed). `open` = allow in that case (fail-open). |
 | `OPENCODE_AUTOMODE_TIMEOUT_MS` | `30000` | Timeout for a single classification call. |
 | `OPENCODE_AUTOMODE_MAX_RETRIES` | `2` | Extra attempts when the classifier response is not valid JSON. |
+| `OPENCODE_AUTOMODE_LOG_PATH` | *(empty)* | File to write plugin logs to (one JSON object per line). Empty disables file logging. |
 
 ## Security notes
 
