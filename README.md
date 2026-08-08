@@ -31,11 +31,11 @@ Or load it directly from a local build (e.g. `dist/index.js`) via a path spec in
 
 | Env var | Default | Description |
 |---|---|---|
-| `AUTOMODE_ENABLED` | `true` | Set to `false` to disable the plugin entirely. |
-| `AUTOMODE_MODEL` | *(auto)* | Classifier model in `provider/model` format (e.g. `opencode-go/deepseek-v4-flash`). Defaults to the model of the calling session, then to the configured default model. |
-| `AUTOMODE_FAIL_MODE` | `closed` | `closed` = block when the classifier fails or times out (fail-closed). `open` = allow in that case (fail-open). |
-| `AUTOMODE_TIMEOUT_MS` | `30000` | Timeout for a single classification call. |
-| `AUTOMODE_MAX_RETRIES` | `2` | Extra attempts when the classifier response is not valid JSON. |
+| `OPENCODE_AUTOMODE_ENABLED` | `true` | Set to `false` to disable the plugin entirely. |
+| `OPENCODE_AUTOMODE_MODEL` | *(auto)* | Classifier model in `provider/model` format (e.g. `opencode-go/deepseek-v4-flash`). Defaults to the model of the calling session, then to the configured default model. |
+| `OPENCODE_AUTOMODE_FAIL_MODE` | `closed` | `closed` = block when the classifier fails or times out (fail-closed). `open` = allow in that case (fail-open). |
+| `OPENCODE_AUTOMODE_TIMEOUT_MS` | `30000` | Timeout for a single classification call. |
+| `OPENCODE_AUTOMODE_MAX_RETRIES` | `2` | Extra attempts when the classifier response is not valid JSON. |
 
 ## Security notes
 
