@@ -3,6 +3,10 @@
   "version": "0.1.1",
   "description": "OpenCode plugin that classifies bash commands with an LLM before execution: safe commands are allowed, dangerous ones are rejected.",
   "author": "Common Creation, Co., Ltd.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/common-creation/opencode-plugin-automode.git"
+  },
   "type": "module",
   "license": "MIT",
   "main": "./dist/index.js",
