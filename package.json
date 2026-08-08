@@ -1,0 +1,41 @@
+{
+  "name": "@common-creation/opencode-plugin-automode",
+  "version": "0.1.0",
+  "description": "OpenCode plugin that classifies bash commands with an LLM before execution: safe commands are allowed, dangerous ones are rejected.",
+  "author": "Common Creation, Co., Ltd.",
+  "type": "module",
+  "license": "MIT",
+  "main": "./dist/index.js",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "bun test",
+    "prepublishOnly": "bun run build",
+    "npm-publish": "npm publish --access public",
+    "npm-publish:dry-run": "npm publish --access public --dry-run"
+  },
+  "keywords": [
+    "opencode",
+    "plugin",
+    "automode",
+    "safety",
+    "classifier"
+  ],
+  "dependencies": {
+    "@opencode-ai/sdk": "^1.18.15"
+  },
+  "devDependencies": {
+    "@opencode-ai/plugin": "^1.18.15",
+    "@types/node": "^24.0.0",
+    "typescript": "^5.7.0"
+  }
+}
