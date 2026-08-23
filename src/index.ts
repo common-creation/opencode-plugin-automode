@@ -2,6 +2,7 @@ import type { Plugin } from "@opencode-ai/plugin"
 import { createClassifier } from "./classifier.js"
 import { loadConfig } from "./config.js"
 import { createLogger } from "./logger.js"
+import { setupV2 } from "./v2.js"
 
 const SERVICE = "automode"
 
@@ -106,3 +107,24 @@ export const AutoMode: Plugin = async ({ client, directory }) => {
     },
   }
 }
+
+// One default export serves both OpenCode generations, matching how the
+// loaders pick their entry point:
+//
+// - OpenCode 1.x validates the module loosely and calls `server` with the
+//   legacy plugin input ({ client, directory, ... }); the hooks object it
+//   returns is registered. It also invokes `setup`, which no-ops there.
+// - OpenCode 2.x schema-validates the default export as { id, setup } (extra
+//   keys are tolerated) and registers hooks imperatively from `setup`; the
+//   `server` function is never called.
+type DualRuntimePlugin = {
+  id: string
+  server: Plugin
+  setup: (context: unknown) => Promise<void> | void
+}
+
+export default {
+  id: "common-creation.automode",
+  server: AutoMode,
+  setup: setupV2,
+} satisfies DualRuntimePlugin
