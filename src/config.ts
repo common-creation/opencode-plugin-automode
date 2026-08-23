@@ -1,3 +1,5 @@
+import { homedir } from "node:os"
+
 export type AutoModeConfig = {
   enabled: boolean
   model: { providerID: string; modelID: string } | null
@@ -5,6 +7,18 @@ export type AutoModeConfig = {
   timeoutMs: number
   maxRetries: number
   logPath: string
+}
+
+// Expand a leading "~" to the user's home directory. Node filesystem calls do
+// not perform shell-style tilde expansion, so a literal "~" from config would
+// otherwise be treated as a relative directory name. Both separators are
+// accepted because OpenCode may run directly on Windows.
+export function expandHomePath(path: string): string {
+  if (path === "~") return homedir()
+  if ((path[1] === "/" || path[1] === "\\") && path.startsWith("~")) {
+    return homedir() + path.slice(1)
+  }
+  return path
 }
 
 function parseBool(value: string | undefined, fallback: boolean): boolean {
@@ -31,6 +45,6 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AutoModeConfig
     failMode: env.OPENCODE_AUTOMODE_FAIL_MODE?.trim().toLowerCase() === "open" ? "open" : "closed",
     timeoutMs: parseIntNonNegative(env.OPENCODE_AUTOMODE_TIMEOUT_MS, 30_000),
     maxRetries: parseIntNonNegative(env.OPENCODE_AUTOMODE_MAX_RETRIES, 2),
-    logPath: env.OPENCODE_AUTOMODE_LOG_PATH?.trim() ?? "",
+    logPath: expandHomePath(env.OPENCODE_AUTOMODE_LOG_PATH?.trim() ?? ""),
   }
 }
